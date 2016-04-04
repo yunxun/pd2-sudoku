@@ -1,38 +1,26 @@
-#include<iostream>
-#include<vector>
-#include<ctime>
-
+#include <bits/stdc++.h>
 using namespace std;
-
-class Sudoku{
-	public:
-		Sudoku();
-		Sudoku(const int init_map[]);
-		//void initial();
-		void giveQuestion();
-		void readIn();
-		void slove();
-		void changeNum(int a, int b);
-		void changeRow(int a, int b);
-		void changeCol(int a ,int b);
-		void rotate(int n);
-		void flip(int n);//(0<=n<=1)
-		void transform();
-		void change();
-		//void printOut(bool ans);		
-		bool checkCorrect();
-		
-		void setmap(const int setMap[]);
-		void printOut();  
-		void swap(int&a,int&b);
-
-		static const int sudokuSize = 81;
-		static const int width = 3;//column width
-			
+class Sudoku
+{
+    public:
+       Sudoku();
+       void giveQuestion();
+       void readIn();// ok
+       void solve();// ok
+       void changeNum(int a,int b);// ok
+	   void changeRow(int a,int b);// ok
+	   void changeCol(int a,int b);// ok
+	   void printOut(bool isAns);// ok
+	   void rotate(int n);// ok
+	   void flip(int n);// ok
+	   void transform();// 不知道要幹嘛，照打
+	   void change();// ok
 	private:
-		int i,j,k;
-		int map[81];
-		int temp;
-		bool judge();
-		int map1[9][9];
+	   const int sudokuSize, maxn;
+	   bool yes;
+	   int d[10][10],ans[10][10], num_ans;
+	   vector<int> X,Y;
+	   bool check();
+	   void dfs(int index);
 };
+

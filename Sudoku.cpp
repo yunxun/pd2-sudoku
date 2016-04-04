@@ -1,175 +1,186 @@
-#include<iostream>
-#include"Sudoku.h"
+#include "Sudoku.h"
 
-using namespace std;
+Sudoku::Sudoku():sudokuSize(9), maxn(3){
+	X.clear();
+	Y.clear();
+	yes = false;
+	num_ans = 0;
+}
 
-Sudoku::Sudoku()
-	{
-
-		for (int i = 0 ;i<sudokuSize ;i++)
-		{
-			map[i]=0;
-			/*cout << map[i] << " ";
-			if( i % 9 == 8)
-				cout <<endl;*/
+void Sudoku::giveQuestion(){
+	memset(d,0,sizeof(d));
+	for(int i=1; i<=sudokuSize; i++)
+		for(int j=1; j<=sudokuSize; j++){
+			X.push_back(i);
+			Y.push_back(j);
 		}
-	}
-	
-void Sudoku::readIn()
-	{
-
-		for (int j = 0 ;j<sudokuSize ;j++)
-		{
-			int temp;
-			cin >> temp;
-			map[j]=temp;
-			/*cout << map[j] << " ";
-			if(j % 9 == 8)
-				cout<<endl;
-			*/	
+	dfs(0);
+	memcpy(d, ans, sizeof(ans));
+	for(int i=1;i<=sudokuSize; i++){
+		for(int j=1; j<=sudokuSize; j++){
+			if(rand()%2==0) printf("%d ",d[i][j]);
+			else printf("0 ");
 		}
+		printf("\n");
 	}
+}
 
-void Sudoku::setmap(const int setmap[])
-	{
-		int i;
-		for(i=0;i<sudokuSize;i++)
-		{
-			map[i]=setmap[i];
-		}
-	}
-
-void Sudoku::printOut()
-	{
-		int i;
-		for(int i = 0; i<sudokuSize ; i++)
-		{	
-			cout<<map[i];
-			cout<<(((i+1)%9 == 0)?'\n':' ');
-		}
-	}
-	
-void Sudoku::giveQuestion()
-	{
-		int giveMap[sudokuSize]={8,0,0,0,0,0,0,0,0,
-							0,0,3,6,0,0,0,0,0,
-		        			0,7,0,0,9,0,2,0,0,	
-		 					0,0,0,0,0,7,0,0,0,
-				            0,0,0,0,4,5,7,0,0,
-				            0,0,0,1,0,0,0,3,0,
-				            0,0,1,0,0,0,0,6,8,
-				            0,0,8,5,0,0,0,1,0,
-				            0,9,0,0,0,0,4,0,0
-		};
-		setmap(giveMap);
-		printOut();	
-	
-	}
-	
-
-/*void Sudoku::slove()
-
-	{
-		
-
-
- 
- 	}	
-
-
-void Sudoku::changeNum(int a, int b)
-	{
-		if(a == b) return;
-		int i, j;
-		for(i=0; i<9; i++)
-			for(j=0; j<9; j++)
-			{
-				if (map[i][j]==a)
-					map[i][j]=b;
-				else if(map[i][j]==b)
-					map[i][j]=a;
+void Sudoku::readIn(){
+	for(int i=1; i<=sudokuSize; i++)
+		for(int j=1; j<=sudokuSize; j++){
+			scanf("%d",&d[i][j]);
+			if(d[i][j] == 0){
+				X.push_back(i);
+				Y.push_back(j);
 			}
-	
+		}
+}
+
+void Sudoku::changeNum(int a,int b){
+	for(int i=1; i<=sudokuSize; i++)
+		for(int j=1; j<=sudokuSize; j++){
+			if(d[i][j] == a) d[i][j] = b;
+			else if(d[i][j] == b) d[i][j] = a;
+		}
+}
+
+void Sudoku::changeRow(int a,int b){
+	int temp;
+	for(int i=1; i<=maxn; i++)
+		for(int j=1; j<=sudokuSize; j++){
+			temp= d[a*3+i][j];
+			d[a*3+i][j] = d[b*3+i][j];
+			d[b*3+i][j] = temp;
+		}
+}
+
+void Sudoku::changeCol(int a,int b){
+	int temp;
+	for(int i=1; i<=maxn; i++)
+		for(int j=1; j<=sudokuSize; j++){
+			temp= d[j][a*3+i];
+			d[j][a*3+i] = d[j][b*3+i];
+			d[j][b*3+i] = temp;
+		}
+}
+
+void Sudoku::rotate(int n){
+	if(!n) return;
+	n %= 4;
+	while(n--){
+		int temp[10][10];
+		for(int i=1; i<=sudokuSize; i++){
+			for(int j=1; j<=sudokuSize; j++)
+				temp[i][j] = d[sudokuSize-j+1][i];
+		}
+		memcpy(d, temp, sizeof(d));
 	}
-*/
-void Sudoku::swap(int &a, int &b)
-	{
-		int temp;
-		temp = a;
-		a = b;
-		b = temp;
+}
+
+void Sudoku::flip(int n){
+	int temp;
+	if(n==0){// vertically A|B
+		for(int i=1; i<=sudokuSize/2; i++)
+			for(int j=1; j<=sudokuSize; j++){
+				temp = d[j][i];
+				d[j][i] = d[j][sudokuSize-i+1];
+				d[j][sudokuSize-i+1] = temp;
+			}
 	}
-
-/*
-void Sudoku::changeRow(int a, int b)
-	{
-		if(a==b) return;
-		int i,j;
-		a*=3; b*=3;
-		for (i=0; i<3; i++, a++, b++)
-			for(j=0; j<9; j++)
-				swap(map[a][j], map[b][j]);
+	else{
+		for(int i=1; i<=sudokuSize/2; i++)
+			for(int j=1; j<=sudokuSize; j++){
+				temp = d[i][j];
+				d[i][j] = d[sudokuSize-i+1][j];
+				d[sudokuSize-i+1][j] = temp;
+			}
 	}
+}
 
-void Sudoku::chageCol(int a, int b)
-	{
-		if(a == b) return;
-		int i, j;
-		a*=width; b*=width;
-		for(i=0 ; i<3; i++, a++, b++)
-			for(j=0;j=9;j++)
-				swap(map[j][a], map[j][b]);
+void Sudoku::transform(){
+	readIn();
+	change();
+	printOut(false);
+}
+
+void Sudoku::change(){
+	srand(time(NULL));
+	changeNum(rand()%sudokuSize+1, rand()%sudokuSize+1);
+	changeRow(rand()%3, rand()%3);
+	changeCol(rand()%3, rand()%3);
+	rotate(rand()%101);
+	flip(rand()%2);
+}
+
+void Sudoku::solve(){
+	if(X.size()==0 && check()){
+		memcpy(ans, d, sizeof(ans));
+		printOut(true);
 	}
-*/
-void Sudoku::rotate(int n)
-	{
-		int i,j;
-		for(n%=4; n>0; n--)
-			for(i= 0; i<4; i++)
-				for(j=0; j<5; j++)
-				{
-					swap(map1[i][j], map1[8-j][i]);
-					swap(map1[8-j][i], map1[8-i][8-j]);
-					swap(map1[8-i][8-j], map1[j][8-i]);
-				}
+	else if(X.size()==0) printf("0\n");
+	else dfs(0);
+
+	if(X.size()){
+		if(yes==false)	printf("0");
+		else if(num_ans == 1) printOut(true)
+		else printf("2\n");
 	}
-	
-/*
-void Sudoku::filp(int n)
-	{
+}
 
-
+void Sudoku::printOut(bool isAns){
+	if(isAns){
+		printf("1\n");
+		for(int i=1; i<=sudokuSize; i++){
+			for(int j=1; j<=sudokuSize; j++)
+				printf("%d ",ans[i][j]);
+			printf("\n");
+		}
 	}
-
-void Sudoku::transform()
-	{
-		readIn();
-		change();
-		printOut(false);
-
+	else{
+		for(int i=1; i<=sudokuSize; i++){
+			for(int j=1; j<=sudokuSize; j++)
+				printf("%d ",d[i][j]);
+			printf("\n");
+		}
 	}
+}
 
-void Sudoku::change()
-	{
-		srand(time(NULL));
-		changeNum(rand()%SudokuNum+1, rand()%SudokuNum+1);
-		changeRow(rand()%3, rand()%3);
-		changeCol(rand()%3, rand()%3);
-		rotate(rand()%101);
-		flip(rand()%2);
+bool Sudoku::check(){
+	bool used[3][10][10];
+	memset(used,0,sizeof(used));
+	for(int i=1; i<=maxn*maxn; i++)
+		for(int j=1; j<=maxn*maxn; j++)if(d[i][j]){
+			int ix = i/maxn + (i%maxn!=0? 1:0) - 1;
+			int iy = j/maxn + (j%maxn!=0? 1:0) - 1;
+			if(used[0][i][d[i][j]]) return false;
+			if(used[1][j][d[i][j]]) return false;
+			if(used[2][ix*3+iy][d[i][j]]) return false;
+			used[0][i][d[i][j]] = 1;
+			used[1][j][d[i][j]] = 1;
+			used[2][ix*3+iy][d[i][j]] = 1;
+		}
+	return true;
+}
+
+void Sudoku::dfs(int index){
+	if(num_ans>=2) return;
+	if(index==X.size()){
+		memcpy(ans, d, sizeof(d));
+		num_ans++;
+		yes = 1;
+		return;
 	}
-
-/*void Sudoku::printOut(bool ans)
-	{
-		int i;
-		if(!ans)
-			for(i=0; i<sudokuSize; i++)
-				cout << map[i] <<(i+1)%9==0?'\n':' '
-		else
-			for(i=0; i<sudokuSize; i++)
-				cout << ans[i] <<(i+1)%9==0?'\n':' '
-
+	int x,y;
+	x = X[index];
+	y = Y[index];
+	for(int i=1; i<=sudokuSize; i++){
+		d[x][y] = i;
+		if(!check()){
+			d[x][y] = 0;
+			continue;
+		}
+		dfs(index+1);
+		d[x][y] = 0;
 	}
+}
 
-
-*/
