@@ -13,7 +13,7 @@ class Sudoku
 	   void printOut(bool isAns);// ok
 	   void rotate(int n);// ok
 	   void flip(int n);// ok
-	   void transform();// 不知道要幹嘛，照打
+	   void transform();// 照打
 	   void change();// ok
 	private:
 	   const int sudokuSize, maxn;
