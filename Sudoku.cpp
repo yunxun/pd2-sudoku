@@ -122,7 +122,7 @@ void Sudoku::solve(){
 
 	if(X.size()){
 		if(yes==false)	printf("0");
-		else if(num_ans == 1) printOut(true)
+		else if(num_ans == 1) printOut(true);
 		else printf("2\n");
 	}
 }
